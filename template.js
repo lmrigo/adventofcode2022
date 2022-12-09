@@ -9,7 +9,7 @@ var part1 = function() {
     var numberStrings = input[i].split(/\s+/)
     var numbers = $.map(numberStrings, (val => {return Number(val)}))
 
-    var result = 0
+    const result = 0
     // console.log(result)
     $('#part1').append(input[i])
       .append('<br>&emsp;')
@@ -24,14 +24,13 @@ var part2 = function () {
     var numberStrings = input[i].split(/\s+/)
     var numbers = $.map(numberStrings, (val => {return Number(val)}))
 
-    var result = 0
+    const result = 0
     // console.log(result)
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)
       .append('<br>')
   }
-
 }
 
 $(function (){
