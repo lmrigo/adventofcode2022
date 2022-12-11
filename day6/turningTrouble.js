@@ -29,7 +29,7 @@ var part1 = function() {
     }
 
     var result = markerPos
-    // console.log(result)
+    // 1965
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -59,7 +59,7 @@ var part2 = function () {
     }
 
     var result = markerPos
-    // console.log(result)
+    // 2773
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

@@ -191,7 +191,7 @@ var part1 = function() {
     const result = cyclesToCheck.reduce((acc,val)=>{
       return acc+val
     })
-    // console.log(result)
+    // 13180
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)

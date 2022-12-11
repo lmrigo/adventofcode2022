@@ -91,7 +91,7 @@ var part1 = function() {
     })
 
     const result = sumOfDirsUnderMaxSize
-    // console.log(result)
+    // 1845346
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -209,7 +209,7 @@ var part2 = function () {
 
 
     var result = targetedDirSize
-    // console.log(result)
+    // 3636703
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

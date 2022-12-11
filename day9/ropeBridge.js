@@ -82,7 +82,7 @@ var part1 = function() {
     // console.log(Object.keys(positions).length)
     const totalVisitedPositions = Object.keys(positions).length
     const result = totalVisitedPositions
-    // console.log(result)
+    // 6081
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -179,7 +179,7 @@ var part2 = function () {
 
     const totalVisitedPositions = Object.keys(positions).length
     const result = totalVisitedPositions
-    // console.log(result)
+    // 2487
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

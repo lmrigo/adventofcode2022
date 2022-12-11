@@ -29,7 +29,7 @@ var part1 = function() {
     }
 
     var result = visibleCounter
-    // console.log(result)
+    // 1763
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -119,7 +119,7 @@ var part2 = function () {
     }
 
     var result = highestScore
-    // console.log(result)
+    // 671160
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

@@ -42,7 +42,7 @@ var part1 = function() {
       return acc > val.total ? acc : val.total
     },0)
 
-    // console.log(result)
+    // 69281
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -77,7 +77,7 @@ var part2 = function () {
     })
 
     var result = elves[0].total + elves[1].total + elves[2].total
-    // console.log(result)
+    // 201524
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

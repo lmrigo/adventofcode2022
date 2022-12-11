@@ -68,7 +68,7 @@ var part1 = function() {
     }
 
     var result = tops
-    // console.log(result)
+    // FCVRLMVQP
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -114,7 +114,7 @@ var part2 = function () {
     }
 
     var result = tops
-    // console.log(result)
+    // RWLWGJGFD
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

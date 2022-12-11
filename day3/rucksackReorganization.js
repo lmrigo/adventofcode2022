@@ -33,7 +33,7 @@ var part1 = function() {
     })
 
     var result = prioritySum
-    // console.log(result)
+    // 7845
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -85,7 +85,7 @@ var part2 = function () {
     }
 
     var result = prioritySum
-    // console.log(result)
+    // 2790
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

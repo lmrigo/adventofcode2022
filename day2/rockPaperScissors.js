@@ -62,7 +62,7 @@ var part1 = function() {
     var result = rounds.reduce((acc,val) => {
       return acc + val[0]
     },0)
-    // console.log(result)
+    // 14375
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -124,7 +124,7 @@ var part2 = function () {
     var result = rounds.reduce((acc,val) => {
       return acc + val[0]
     },0)
-    // console.log(result)
+    // 10274
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)

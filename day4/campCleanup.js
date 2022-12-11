@@ -37,7 +37,7 @@ var part1 = function() {
     })
 
     var result = fullyContained
-    // console.log(result)
+    // 602
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -84,7 +84,7 @@ var part2 = function () {
     })
 
     var result = overlaps
-    // console.log(result)
+    // 891
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)
