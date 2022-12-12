@@ -224,7 +224,7 @@ var part2 = function () {
 
 $(function (){
   $('#main').append('<div id="part1"><h2>part 1</h2></div>')
-  // part1()
+  part1()
   $('#main').append('<br><div id="part2"><h2>part 2</h2></div>')
   part2()
   $('#main').append('<br>')
