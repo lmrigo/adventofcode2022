@@ -254,68 +254,71 @@ var part2 = function () {
     minY -= border
     maxY += border
 
+    //store intervals instead of marking in the grid
     var intervals = []
+    var blankX
+    var blankY
 
     //fill only resultRow with signal
+    //TODO: limitar iteração pra minSensorY-ss até maxSensorY+ss
     for (var y = minDistressBeaconY; y < maxDistressBeaconY; y++) {
       $.each(sensors,(idx,s)=>{
         // find if there's intersection between y and s.y
         var inter = intersection(s,y)
-        // there can be only 1 or 2 intersections
+        // if yes, store in intersections
         if (inter.length > 0) {
-          // if yes, fill low x and high x
-          //TODO: store intervals instead of marking in the grid
+          //TODO: armazenar todos intervalos sem processar
+          // ----
+          // [--]
           if (intervals[y] === undefined) {
             intervals[y] = []
             intervals.push([inter[0],inter[1]])
           } else {
-            // [--]
-            // ----[--]
+            //compare the new interval to existing ones
+            $.each(intervals[y],(idx,interSrc) => {
+              // [--]
+              // -----[--]
 
-            // [--]
-            // --[--]
+              // [--]
+              // ---[--]
 
-            // [--]
-            // [--]
+              // [--]
+              // --[--]
 
-            // --[--]
-            // [--]
+              // [--]
+              // [--]
 
-            // ----[--]
-            // [--]
+              // --[--]
+              // [--]
 
-            // [----]
-            // -[--]
+              // ---[--]
+              // [--]
 
-            // -[--]
-            // [----]
+              // -----[--]
+              // [--]
 
-            if (inter[0] < intervals[y][0]) {
-              const last = intervals[y].length-1
-              if (inter[1] >= intervals[y][last][1]) {
-                intervals[y] = [inter[0],inter[1]]
-              } else if (inter[1] < intervals[]) {
+              // [----]
+              // -[--]
 
-              }
-
-            }
+              // -[--]
+              // [----]
+            })
           }
 
-          // Then later search for the blank spot, line by line
         }
       })
+      // After the row is filled, search for the blank spot
+      //TODO: e só depois na hora de procurar o blank space resolver, iterando do menor x entre os intervalos até o maior
+      //TODO: depois de juntar todos intervalos, procurar o que tem distancia de 2 (1 espaço em branco)
+      if (false) {
+        blankX = -1
+        blankY = y
+        break
+      }
     }
 
-    for (var s = 0; s < sensors.length; s++) {
-      grid[sensors[s].y][sensors[s].x] = 'S'
-    }
-    for (var b = 0; b < beacons.length; b++) {
-      grid[beacons[b].y][beacons[b].x] = 'B'
-    }
-    printGrid()
 
-    //calcFrequency()
-    const result = 0
+    const result = calcFrequency(blankX,blankY)
     // console.log(result)
     $('#part2').append(input[i])
       .append('<br>&emsp;')
