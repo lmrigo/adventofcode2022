@@ -146,30 +146,28 @@ var part1 = function() {
   }
 }
 
-/*
-//print list
-var strp = ''
-var nodep = refArray[0]
-var np = refArray.length
-while (np-- > 0) {
-  strp += nodep.val + ', '
-  nodep = nodep.next
+var printList = function(first,length) {
+  var strp = ''
+  var nodep = first
+  var np = length
+  while (np-- > 0) {
+    strp += nodep.val + ', '
+    nodep = nodep.next
+  }
+  console.log(strp)
 }
-console.log(strp)
-
-*/
 
 const decriptionKey = 811589153 //part 2 specific
 
 var part2 = function () {
 
-  for (var i = 0; i < input.length-1; i++) {
+  for (var i = 0; i < input.length; i++) {
     var numberStrings = input[i].split(/\s+/)
     var numbers = $.map(numberStrings, (val => {return Number(val)}))
 
     var refArray = []
     var firstNum = {
-      val: numbers[0],//*decriptionKey,
+      val: numbers[0]*decriptionKey,
       prev:null,
       next:null,
       id:'id'+0
@@ -178,7 +176,7 @@ var part2 = function () {
     var prevNum = firstNum
     for (var n = 1; n < numbers.length; n++) {
       var num = {
-        val: numbers[n],//*decriptionKey,
+        val: numbers[n]*decriptionKey,
         prev: prevNum,
         next: null,
         id:'id'+n
@@ -195,16 +193,34 @@ var part2 = function () {
 
     // console.log(refArray)
 
-//TODO: implement logic to match this:
+// This was actually not needed.
+// The ref list didn't rebuild after each iteration
+//weird2 part2 logic for firstnum
 // 1, -3, 2, 3, -2, 0, 4 |-3
-// -3, 1, 2, 3, -2, 0, 4 |-2
-// 4, 1, 2, 3, -2, 0, -3 |-1
-// 4, 1, 2, 3, -2, -3, 0 |0
-// 1, 2, 3, -2, -3, 0, 4 |actual
+// -3, 1, 2, 3, -2, 0, 4 |-2!
+// 4, 1, 2, 3, -2, 0, -3 |-1!
+// 4, 1, 2, 3, -2, -3, 0 | 0
+// 1, 2, 3, -2, -3, 0, 4 | actual
+
+// 1, 2, -2, -3, 0, 3, 4 |-2
+// 1, -2, 2, -3, 0, 3, 4 |-1!
+// -2, 1, 2, -3, 0, 3, 4 | 0!
+// 1, 2, -3, 0, 3, 4, -2 | actual
+
+
+// 1, 2, -3, 0, 3, 4, -2 | 4
+// 1, 2, -3, 0, 3, -2, 4 | 3!
+// 4, 2, -3, 0, 3, -2, 1 | 2!
+// 2, 4, -3, 0, 3, -2, 1 | 1
+// 2, -3, 4, 0, 3, -2, 1 | 0
+// 1, 2, -3, 4, 0, 3, -2 | actual
+    var printFirst = refArray[0]
 
     const totalMix = 10 // part 2 specific
     for (var m = 0; m < totalMix; m++) {
-      console.log(refArray)
+      // console.log(refArray)
+      // printList(printFirst,refArray.length)
+
       //mix
       for (var n = 0; n < refArray.length; n++) {
         var numA = refArray[n]
@@ -216,11 +232,13 @@ var part2 = function () {
             //ap B   A bn
             var numB = numA.next
 
-            if (numB.id === firstNum.id) {
-              firstNum = numA
-            } else if (numA.id === firstNum.id) {
-              firstNum = numB
-            }
+            // not needed. see comment on line 196
+            // if (numB.id === firstNum.id) {
+            //   // firstNum = numA //normally should be this
+            //   firstNum = numB //weird part 2 logic
+            // } else if (numA.id === firstNum.id) {
+            //   firstNum = numB
+            // }
 
             numA.prev.next = numB
             numB.next.prev = numA
@@ -246,11 +264,14 @@ var part2 = function () {
             //bp A   B an
             var numB = numA.prev
 
-            if (numB.id === firstNum.id) {
-              firstNum = numA
-            } else if (numA.id === firstNum.id) {
-              firstNum = numB
-            }
+            // not needed. see comment on line 196
+            // if (numB.id === firstNum.id) {
+            //   // firstNum = numA //normally should be this
+            //   firstNum = numB //weird part 2 logic
+            // } else if (numA.id === firstNum.id) {
+            //   // firstNum = numB //normally should be this
+            //   firstNum = numA.next //weird part 2 logic
+            // }
 
             numA.next.prev = numB
             numB.prev.next = numA
@@ -270,22 +291,27 @@ var part2 = function () {
             //   A - B
             //bp B   A an
           }
+        } else { // it's 0
+          printFirst = numA
         }
         // console.log(numA.prev.val+'<'+numA.val+'>'+numA.next.val)
       }
+
+      // not needed. see comment on line 196
       //rebuild refArray for next iteration
-      refArray = []
-      refArray[0] = firstNum
-      var nodeR = firstNum.next
-      var r = 1
-      while (r < numbers.length) {
-        refArray[r] = nodeR
-        nodeR = nodeR.next
-        r++
-      }
+      // refArray = []
+      // refArray[0] = firstNum
+      // var nodeR = firstNum.next
+      // var r = 1
+      // while (r < numbers.length) {
+      //   refArray[r] = nodeR
+      //   nodeR = nodeR.next
+      //   r++
+      // }
       // console.log(refArray)
     }
-      console.log(refArray)
+    // console.log(refArray)
+    // printList(printFirst,refArray.length)
 
 
     //1000th, 2000th, and 3000th numbers after the value 0,
@@ -327,7 +353,7 @@ var part2 = function () {
 
     // console.log(marker1,marker2,marker3)
     const result = marker1 + marker2 + marker3
-    // console.log(result)
+    // 6676132372578
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)
