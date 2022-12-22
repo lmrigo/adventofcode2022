@@ -4,11 +4,11 @@ Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsid
  ,puzzleInput
 ]
 
-const maxMinutes = 24
+var maxMinutes = 24
 
 var part1 = function() {
 
-  for (var i = 0; i < input.length-1; i++) {
+  for (var i = 0; i < input.length; i++) {
     var blueprintStrings = input[i].split(/\n+/)
     var blueprints = []
     $.each(blueprintStrings,(idx,val)=>{
@@ -49,12 +49,14 @@ var part1 = function() {
     var qualityLevel = []
     $.each(blueprints,(idx,bp)=>{
       var geodes = simulate(bp)
+      // console.log('Blueprint: ',bp.id)
       qualityLevel.push(bp.id*geodes)
     })
-    console.log(qualityLevel)
-
+    // console.log(qualityLevel)
+    // (2) [9, 24]
+    //(30) [9, 0, 3, 36, 0, 12, 56, 8, 0, 0, 66, 24, 26, 0, 30, 0, 0, 234, 0, 140, 126, 0, 345, 24, 75, 0, 108, 364, 174, 300]
     const result = qualityLevel.reduce((acc,val) => acc+val)
-    // 2159 too low
+    // 2160  (2159 too low !!!!)
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -82,9 +84,9 @@ var simulate = function(bp) {
   var nextStates = [initialState]
   var history = {}
   const initKey = genKey(initialState)
-  history.initKey = true
+  history.initKey = 0
   var maxGeode = 0
-  var timeout = 100000
+  var timeout = 2000000
   while (timeout-- > 0 && nextStates.length > 0) {
     var st = nextStates.shift()
     if (st.resources.geode > maxGeode) {
@@ -92,17 +94,16 @@ var simulate = function(bp) {
       console.log(st)
     }
 
-    // var generated = genStates(st,bp,history)
-    var generated = genStatesGreedy(st,bp,history)
+    var generated = genStates(st,bp,history)
     // first generate next states: return the generated robot list
     $.each(generated,(idx,gen) => {
       // then collect ores from st
       collectResourcesForNextState(st,gen)
       // then add new states to list
       const key = genKey(gen)
-      if (!history[key]) {
+      if (!history[key] || history[key] >= gen.geode) {
         nextStates.push(gen)
-        history[key] = true
+        history[key] = gen.geode
       }
     })
 
@@ -140,52 +141,6 @@ var collectResourcesForNextState = function(st,st2) {
   }
 }
 
-var genStatesGreedy = function(st,bp,history) {
-  var newStates = []
-  st.minutes++
-  if (st.minutes > maxMinutes) {
-    return newStates
-  }
-  var newSt
-  if (st.resources.ore >= bp.geodROreC
-      && st.resources.obsidian >= bp.geodRObsiC) {
-    newSt = cloneState(st)
-    newSt.resources.ore -= bp.geodROreC
-    newSt.resources.obsidian -= bp.geodRObsiC
-    newSt.robots.geode++
-    newStates.push(newSt)
-  } else if (st.resources.ore >= bp.obsiROreC
-      && st.resources.clay >= bp.obsiRClayC
-      && st.resources.obsidian < bp.geodRObsiC) {
-    newSt = cloneState(st)
-    newSt.resources.ore -= bp.obsiROreC
-    newSt.resources.clay -= bp.obsiRClayC
-    newSt.robots.obsidian++
-    newStates.push(newSt)
-  } else if (st.resources.ore >= bp.clayROreC
-      && st.resources.clay < bp.obsiRClayC) {
-    newSt = cloneState(st)
-    newSt.resources.ore -= bp.clayROreC
-    newSt.robots.clay++
-    newStates.push(newSt)
-  } else if (st.resources.ore >= bp.oreROreC
-      && st.resources.ore < bp.maxOreC+1) {
-    newSt = cloneState(st)
-    newSt.resources.ore -= bp.oreROreC
-    newSt.robots.ore++
-    newStates.push(newSt)
-  } else {
-    newSt = cloneState(st)
-    // don't build robot if saving ore
-    newStates.push(newSt)
-  }
-
-  //build
-
-
-  return newStates
-}
-
 var genStates = function(st,bp,history) {
   var newStates = []
   st.minutes++
@@ -194,7 +149,7 @@ var genStates = function(st,bp,history) {
   }
   var newSt
 
-  if (st.resources.ore < bp.maxOreC) {
+  if (st.resources.ore <= bp.maxOreC) {
     newSt = cloneState(st)
     // don't build robot if saving ore
     newStates.push(newSt)
@@ -249,11 +204,75 @@ var genKey = function (st) {
 
 var part2 = function () {
 
-  for (var i = 0; i < input.length; i++) {
-    var numberStrings = input[i].split(/\s+/)
-    var numbers = $.map(numberStrings, (val => {return Number(val)}))
+  for (var i = 1; i < input.length; i++) {
+    maxMinutes = 32 // part 2 specific
+    var blueprintStrings = input[i].split(/\n+/)
+    var blueprints = []
+    $.each(blueprintStrings,(idx,val)=>{
+      const splitted = val.split(/\:?\s+/)
+      //Blueprint 1:
+      //0         1
+      // Each ore robot costs 4 ore.
+      // 2    3   4     5     6 7
+      // Each clay robot costs 2 ore.
+      // 8    9    10    11    12 13
+      // Each obsidian robot costs 3 ore and 14 clay.
+      // 14   15       16    17    18 19 20  21 22
+      // Each geode robot costs 2 ore and 7 obsidian.
+      // 23   24    25    26    27 28 29  30 31
+      const blueprintNum = Number(splitted[1])
+      const oreRobotOreCost = Number(splitted[6])
+      const clayRobotOreCost = Number(splitted[12])
+      const obsidianRobotOreCost = Number(splitted[18])
+      const obsidianRobotClayCost = Number(splitted[21])
+      const geodeRobotOreCost = Number(splitted[27])
+      const geodeRobotObsiCost = Number(splitted[30])
+      var oreCostArr = [oreRobotOreCost,clayRobotOreCost,obsidianRobotOreCost,geodeRobotOreCost]
+      oreCostArr.sort()
+      const maxOreCost = oreCostArr[3]
+      blueprints.push({
+        id: blueprintNum,
+        oreROreC: oreRobotOreCost,
+        clayROreC: clayRobotOreCost,
+        obsiROreC: obsidianRobotOreCost,
+        obsiRClayC: obsidianRobotClayCost,
+        geodROreC:geodeRobotOreCost,
+        geodRObsiC:geodeRobotObsiCost,
+        maxOreC:maxOreCost
+      })
+      if (idx === 2) { // part 2 uses only the first 3 blueprints
+        return false
+      }
+    })
+    console.log(blueprints)
 
-    const result = 0
+    var maxGeodes = []
+    $.each(blueprints,(idx,bp)=>{
+      if (idx===0) {
+        console.log(58)
+        console.log('Blueprint: ',bp.id)
+        maxGeodes.push(58)
+        return true
+      } else if (idx===1) {
+        console.log(10)
+        console.log('Blueprint: ',bp.id)
+        maxGeodes.push(10)
+        return true
+      }
+
+      var geodes = simulate(bp)
+      console.log('Blueprint: ',bp.id)
+      maxGeodes.push(geodes)
+    })
+    console.log(maxGeodes)
+    // 56,62
+    //(2) [8, 45]
+    //     t24 t30
+    //(3) [58, 10, 7]
+    //             t28
+
+    //TODO: store the best state by minute and try to resume form there
+    const result = maxGeodes.reduce((acc,val) => acc*val)
     // console.log(result)
     $('#part2').append(input[i])
       .append('<br>&emsp;')
