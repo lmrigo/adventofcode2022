@@ -242,6 +242,7 @@ var part1 = function() {
     */
 
     const result = totalSnafuSum
+    // 2==0=0===02--210---1
 
     $('#part1').append(input[i])
       .append('<br>&emsp;')

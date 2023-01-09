@@ -80,7 +80,7 @@ var part1 = function() {
     // console.log(visits)
 
     const result = minMinutes
-    // console.log(result)
+    // 297
     $('#part1').append(input[i])
       .append('<br>&emsp;')
       .append(result)
@@ -277,7 +277,7 @@ var part2 = function () {
     // console.log(visits)
 
     const result = startMins
-    // console.log(result)
+    // 856
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)
