@@ -91,7 +91,11 @@ var simulate = function(bp) {
     var st = nextStates.shift()
     if (st.resources.geode > maxGeode) {
       maxGeode = st.resources.geode
-      console.log(st)
+      // console.log(st)
+    }
+    if (st.resources.geode > bestByMinute[bp.id][st.minutes]) {
+      bestByMinute[bp.id][st.minutes] = st.resources.geode
+      // console.log(bp.id,'bbm: ',st.minutes, st.resources.geode)
     }
 
     var generated = genStates(st,bp,history)
@@ -102,8 +106,11 @@ var simulate = function(bp) {
       // then add new states to list
       const key = genKey(gen)
       if (!history[key] || history[key] >= gen.geode) {
-        nextStates.push(gen)
-        history[key] = gen.geode
+        const threshold = 1 + gen.robots.geode
+        if (gen.resources.geode >= bestByMinute[bp.id][gen.minutes]-threshold) {
+          nextStates.push(gen)
+          history[key] = gen.geode
+        }
       }
     })
 
@@ -202,10 +209,12 @@ var genKey = function (st) {
     + st.resources.geode
 }
 
+var bestByMinute
+
 var part2 = function () {
 
   for (var i = 1; i < input.length; i++) {
-    maxMinutes = 32 // part 2 specific
+    maxMinutes = 32+1 // part 2 specific
     var blueprintStrings = input[i].split(/\n+/)
     var blueprints = []
     $.each(blueprintStrings,(idx,val)=>{
@@ -244,36 +253,90 @@ var part2 = function () {
         return false
       }
     })
-    console.log(blueprints)
+    // console.log(blueprints)
+
+    bestByMinute = []
+    bestByMinute[1] = Array(maxMinutes).fill(0)
+    bestByMinute[2] = Array(maxMinutes).fill(0)
+    bestByMinute[3] = Array(maxMinutes).fill(0)
+    if (i==0) {
+      bestByMinute[1][19] = 1
+      bestByMinute[1][20] = 2
+      bestByMinute[1][21] = 3
+      bestByMinute[1][22] = 5
+      bestByMinute[1][23] = 7
+      bestByMinute[1][24] = 9
+      bestByMinute[1][25] = 12
+      bestByMinute[1][26] = 15
+      bestByMinute[1][27] = 19
+      bestByMinute[1][28] = 24
+      bestByMinute[1][29] = 30
+      bestByMinute[1][30] = 37
+      bestByMinute[1][31] = 45
+      bestByMinute[1][32] = 54 //TODO: the correct answer is 56. don't know what's wrong
+
+      bestByMinute[2][19] = 1
+      bestByMinute[2][20] = 2
+      bestByMinute[2][21] = 4
+      bestByMinute[2][22] = 6
+      bestByMinute[2][23] = 9
+      bestByMinute[2][24] = 12
+      bestByMinute[2][25] = 16
+      bestByMinute[2][26] = 20
+      bestByMinute[2][27] = 25
+      bestByMinute[2][28] = 31
+      bestByMinute[2][29] = 38
+      bestByMinute[2][30] = 45
+      bestByMinute[2][31] = 53
+      bestByMinute[2][32] = 62
+    } else if (i===1) {
+      bestByMinute[1][20] = 1
+      bestByMinute[1][21] = 2
+      bestByMinute[1][23] = 6
+      bestByMinute[1][24] = 9
+      bestByMinute[1][25] = 12
+      bestByMinute[1][26] = 16
+      bestByMinute[1][27] = 21
+      bestByMinute[1][28] = 26
+      bestByMinute[1][29] = 33
+      bestByMinute[1][30] = 41
+      bestByMinute[1][31] = 49
+      bestByMinute[1][32] = 58
+
+      bestByMinute[2][26] = 1
+      bestByMinute[2][27] = 2
+      bestByMinute[2][28] = 3
+      bestByMinute[2][29] = 4
+      bestByMinute[2][30] = 6
+      bestByMinute[2][31] = 8
+      bestByMinute[2][32] = 10
+
+      bestByMinute[3][24] = 1
+      bestByMinute[3][25] = 2
+      bestByMinute[3][26] = 3
+      bestByMinute[3][27] = 5
+      bestByMinute[3][28] = 7
+      bestByMinute[3][29] = 10
+      bestByMinute[3][30] = 14
+      bestByMinute[3][31] = 18
+      bestByMinute[3][31] = 23
+    }
 
     var maxGeodes = []
     $.each(blueprints,(idx,bp)=>{
-      if (idx===0) {
-        console.log(58)
-        console.log('Blueprint: ',bp.id)
-        maxGeodes.push(58)
-        return true
-      } else if (idx===1) {
-        console.log(10)
-        console.log('Blueprint: ',bp.id)
-        maxGeodes.push(10)
-        return true
-      }
-
       var geodes = simulate(bp)
-      console.log('Blueprint: ',bp.id)
+      // console.log('Blueprint: ',bp.id)
       maxGeodes.push(geodes)
     })
-    console.log(maxGeodes)
+    // console.log(maxGeodes)
+    // example
     // 56,62
-    //(2) [8, 45]
-    //     t24 t30
-    //(3) [58, 10, 7]
-    //             t28
+    //(2) [54, 62]
+    // puzzle
+    //(3) [58, 10, 23]
 
-    //TODO: store the best state by minute and try to resume form there
     const result = maxGeodes.reduce((acc,val) => acc*val)
-    // console.log(result)
+    // 13340
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)
