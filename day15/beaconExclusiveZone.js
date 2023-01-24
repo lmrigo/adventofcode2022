@@ -37,6 +37,7 @@ var resetGrid = function() {
 var printGrid = function() {
   var str = ''
   for (var y = minY; y < maxY; y++) {
+    str += y+''
     for (var x = minX; x < maxX; x++) {
       str += grid[y][x]
     }
@@ -101,7 +102,7 @@ var part1 = function() {
     minY -= border
     maxY += border
 
-    /*
+/*
     //fill grid with sensors and beacons
     resetGrid()
     for (var s = 0; s < sensors.length; s++) {
@@ -130,11 +131,11 @@ var part1 = function() {
         }
       }
     })
-    */
+*/
 
     //fill grid with sensors and beacons without 'reset' function
     // resetGrid()
-    var grid = []
+    grid = [] //comment if the 'fill grid' section is uncommented
     // reset only resultRow
     grid[resultRow] = []
     for (var x = minX; x < maxX; x++) {
@@ -196,12 +197,14 @@ var maxCoordinates
 var part2 = function () {
 
   // look for a blank spot in the middle of the sensors area
-  for (var i = 0; i < input.length-1; i++) {
+  for (var i = 0; i < input.length; i++) {
     maxCoordinates = i === 0 ? 20 : part2Constant
     const minDistressBeaconX = 0
     const maxDistressBeaconX = maxCoordinates
     const minDistressBeaconY = 0
     const maxDistressBeaconY = maxCoordinates
+    var minSensorSSY = Number.MAX_SAFE_INTEGER
+    var maxSensorSSY = -1
     var sbLinesStrings = input[i].split(/\n+/)
 
     var sensors = []
@@ -243,6 +246,15 @@ var part2 = function () {
       if (signalStrength > maxSS) {
         maxSS = signalStrength
       }
+
+
+      if ((sensorY-signalStrength) < minSensorSSY) {
+        minSensorSSY = (sensorY-signalStrength)
+      }
+      if ((sensorY+signalStrength) > maxSensorSSY) {
+        maxSensorSSY = (sensorY+signalStrength)
+      }
+
       //save points
       sensors.push({x:sensorX,y:sensorY,ss:signalStrength})
       beacons.push({x:beaconX,y:beaconY})
@@ -255,76 +267,220 @@ var part2 = function () {
     maxY += border
 
     //store intervals instead of marking in the grid
-    var intervals = []
-    var blankX
-    var blankY
+    var blankX = undefined
+    var blankY = undefined
 
+    //limit iteration
+    // from (minSensorY - its signalStrength) to (maxSensorY + its signalStrenght)
+    const lowY = minDistressBeaconY > minSensorSSY ? minDistressBeaconY : minSensorSSY
+    const highY = maxDistressBeaconY < maxSensorSSY ? maxDistressBeaconY : maxSensorSSY
+
+    var intervals = []
     //fill only resultRow with signal
-    //TODO: limitar iteração pra minSensorY-ss até maxSensorY+ss
-    for (var y = minDistressBeaconY; y < maxDistressBeaconY; y++) {
+    for (var y = lowY; y <= highY; y++) {
+      var minInterX = Number.MAX_SAFE_INTEGER
+      var maxInterX = -1
+      intervals = []
       $.each(sensors,(idx,s)=>{
         // find if there's intersection between y and s.y
         var inter = intersection(s,y)
         // if yes, store in intersections
         if (inter.length > 0) {
-          //TODO: armazenar todos intervalos sem processar
-          // ----
-          // [--]
-          if (intervals[y] === undefined) {
-            intervals[y] = []
-            intervals.push([inter[0],inter[1]])
-          } else {
-            //compare the new interval to existing ones
-            $.each(intervals[y],(idx,interSrc) => {
-              // [--]
-              // -----[--]
-
-              // [--]
-              // ---[--]
-
-              // [--]
-              // --[--]
-
-              // [--]
-              // [--]
-
-              // --[--]
-              // [--]
-
-              // ---[--]
-              // [--]
-
-              // -----[--]
-              // [--]
-
-              // [----]
-              // -[--]
-
-              // -[--]
-              // [----]
-            })
+          intervals.push(inter)
+          if (inter[0] < minInterX) {
+            minInterX = inter[0]
           }
-
+          if (inter[1] > maxInterX) {
+            maxInterX = inter[1]
+          }
         }
       })
+
       // After the row is filled, search for the blank spot
-      //TODO: e só depois na hora de procurar o blank space resolver, iterando do menor x entre os intervalos até o maior
-      //TODO: depois de juntar todos intervalos, procurar o que tem distancia de 2 (1 espaço em branco)
-      if (false) {
-        blankX = -1
-        blankY = y
+
+      // Merge all intervals
+      intervals = mergeIntervals(intervals)
+
+      // If there's more than one interval, check if it's a single blank spot
+      if (intervals.length > 1) {
+        intervals.sort((a,b) => {
+          return a[0]-b[0]
+        })
+        // console.log(y,intervals)
+        //check blanks spots
+        for (var a = 0; a < intervals.length-1; a++) {
+          const b = a+1
+          if (intervals[b][0] - intervals[a][1] === 2) {
+            //candidate
+            // console.log(pairToString(intervals[a]) + ' and ' + pairToString(intervals[b]))
+            const x = intervals[a][1] + 1
+            //check if the spot is really blank
+            // if yes, check if top and bottom are closed
+            const spot = {y:y,x:x}
+            var spotFree = true
+            const top = {y:y-1,x:x}
+            var foundTop = false
+            const bottom = {y:y+1,x:x}
+            var foundBottom = false
+            $.each(sensors,(idxs,s2)=>{
+              if (spotFree && (s2.x === spot.x && s2.y === spot.y)) {
+                spotFree = false
+                return false
+              }
+              if (!foundTop && inSensorRange(top.y,top.x,s2)) {
+                foundTop = true
+              }
+              if (!foundBottom && inSensorRange(bottom.y,bottom.x,s2)) {
+                foundBottom = true
+              }
+              if (foundTop && foundBottom) {
+                return false // break foreach
+              }
+            })
+
+            if (foundTop && foundBottom && spotFree) {
+              blankX = x
+              blankY = y
+              // console.log('answer: ',blankX,blankY)
+              break
+            }
+          }
+        }
+      }
+
+      if (blankX !== undefined) {
         break
       }
     }
 
-
     const result = calcFrequency(blankX,blankY)
-    // console.log(result)
+    // 12977110973564
     $('#part2').append(input[i])
       .append('<br>&emsp;')
       .append(result)
       .append('<br>')
   }
+}
+
+var mergeIntervals = function(srcIntervals) {
+  if (srcIntervals.length < 2) {
+    return srcIntervals
+  }
+  var intervals = [...srcIntervals]
+  var tested = []
+  var testCount = 0
+
+  var timeout = 10000
+  while (intervals.length > 1
+        && testCount < intervals.length
+        && timeout-- > 0) {
+
+    var reference
+    for (var n = 0; n < intervals.length; n++) {
+      if (!tested.includes(pairToString(intervals[n]))) {
+        reference = intervals[n]
+        tested.push(pairToString(reference))
+        break
+      } else {
+        testCount++
+      }
+    }
+
+    var newIntervals = []
+    var refMerged = false
+    $.each(intervals,(idx,val) => {
+      var merged = compareIntervals(reference,val)
+      if (merged.length > 0) {
+        if (newIntervals.find((x) => {
+              return x[0]===merged[0] && x[1] === merged[1]
+            }) === undefined) {
+          newIntervals.push(merged)
+        }
+      } else {
+        if (newIntervals.find((x) => {
+              return x[0]===val[0] && x[1] === val[1]
+            }) === undefined) {
+          newIntervals.push(val)
+        }
+      }
+    })
+    if (!refMerged
+      && newIntervals.find((x) => {
+              return x[0]===reference[0] && x[1] === reference[1]
+            }) === undefined) {
+      newIntervals.push(reference)
+    }
+
+    // if there was a change
+    if (intervalsToString(intervals) !== intervalsToString(newIntervals)) {
+      tested = []
+      testCount = 0
+    }
+
+    intervals = [...newIntervals]
+  }
+
+  return intervals
+}
+
+var compareIntervals = function(a,b) {
+  var newInter
+  // [--]-
+  // -----[--]
+  if (a[1]<b[0]) {
+    newInter = []
+  // [--]--  [--]-
+  // ---[--] ---|-
+  } else if (a[0]<b[0] && a[1]===b[0]) {
+    newInter = [a[0],b[1]]
+  // [--]--
+  // --[--]
+  } else if (a[0]<b[0] && a[1]>b[0] && a[1]<b[1]) {
+    newInter = [a[0],b[1]]
+  // [--]  -|-
+  // [--]  -|-
+  } else if (a[0]===b[0] && a[1]===b[1]) {
+    newInter = a
+  // --[--]
+  // [--]--
+  } else if (a[0]>b[0] && a[0]<b[1] && a[1]>b[1]) {
+    newInter = [b[0],a[1]]
+  // ---[--] ---|
+  // [--]--  [--]
+  } else if (a[0]>b[0] && a[0]===b[1]) {
+    newInter = [b[0],a[1]]
+  // -----[--]
+  // [--]-
+  } else if (a[0] > b[1]) {
+    newInter = []
+  // [----]
+  // -[--]-
+  } else if (a[0]<b[0] && a[1]>b[1]) {
+    newInter = a
+  // -[--]-
+  // [----]
+  } else if (a[0]>b[0] && a[1]<b[1]) {
+    newInter = b
+  // [--]-
+  // [---]
+  } else if (a[0]==b[0] && a[1]<b[1]) {
+    newInter = b
+  // [---]
+  // [--]-
+  } else if (a[0]==b[0] && a[1]>b[1]) {
+    newInter = a
+  // [---]
+  // -[--]
+  } else if (a[0]<b[0] && a[1]==b[1]) {
+    newInter = a
+  // -[--]
+  // [---]
+  } else if (a[0]>b[0] && a[1]==b[1]) {
+    newInter = b
+  } else {
+    console.log('faltou esse caso: '+a[0]+'-'+a[1]+'  '+b[0]+'-'+b[1])
+  }
+  return newInter
 }
 
 // it's an intersection between circle and line
@@ -347,7 +503,19 @@ var intersection = function(s, row) {
   return inter
 }
 
-var calcFrequency = function (x,y) {
+var pairToString = function(pair) {
+  return pair[0] + '-' + pair[1]
+}
+
+var intervalsToString = function(intervals) {
+  var str = ''
+  for (var i = 0; i < intervals.length; i++) {
+    str += pairToString(intervals[i]) + ','
+  }
+  return str
+}
+
+var calcFrequency = function(x,y) {
   return (x*part2Constant) + y
 }
 
